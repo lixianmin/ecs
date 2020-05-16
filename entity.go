@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"reflect"
 	"unsafe"
 )
 
@@ -10,6 +11,8 @@ author:     lixianmin
 
 Copyright (C) - All Rights Reserved
 *********************************************************************/
+
+var emptyArgs = make([]reflect.Value, 0)
 
 type Entity struct {
 	keys  []int
@@ -70,6 +73,53 @@ func (entity *Entity) GetPart(key int) IPart {
 	}
 
 	return nil
+}
+
+func (entity *Entity) SendMessage(methodName string, args ...interface{}) {
+	var parts = entity.parts
+	var count = len(parts)
+	for i := 0; i < count; i++ {
+		var part = parts[i]
+		var value = reflect.ValueOf(part)
+		if !value.IsValid() {
+			continue
+		}
+
+		var method = value.MethodByName(methodName)
+		if !method.IsValid() {
+			continue
+		}
+
+		var args1 = fetchArgs(method, args...)
+		if args1 != nil {
+			method.Call(args1)
+		}
+	}
+}
+
+func fetchArgs(method reflect.Value, args ...interface{}) []reflect.Value {
+	var methodType = method.Type()
+	var numIn = methodType.NumIn()
+	if numIn == 0 {
+		return emptyArgs
+	}
+
+	// 如果输入参数多于需要的参数，则忽略多余的参数
+	var numArgs = len(args)
+	if numIn > numArgs {
+		return nil
+	}
+
+	var args1 = make([]reflect.Value, 0, numIn)
+	for i := 0; i < numIn; i++ {
+		if methodType.In(i) != reflect.TypeOf(args[i]) {
+			return nil
+		}
+
+		args1 = append(args1, reflect.ValueOf(args[i]))
+	}
+
+	return args1
 }
 
 func (entity *Entity) ClearParts() {

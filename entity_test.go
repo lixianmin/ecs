@@ -33,6 +33,10 @@ func (title *Title) OnRemoving() {
 	fmt.Printf("before removed, player=%v\n", player)
 }
 
+func (title *Title) Print(d int) {
+	fmt.Printf("===> print: %d\n\n", d)
+}
+
 func TestEntity_AddPart(t *testing.T) {
 	const title = 1
 
@@ -76,5 +80,31 @@ func TestEntity_AddParts(t *testing.T) {
 	var removed = player.RemovePart(title2)
 	if removed.(*Title).key != title2 {
 		t.Errorf("remove error")
+	}
+}
+
+func TestEntity_SendMessage(t *testing.T) {
+	var player = &Player{}
+	player.AddPart(1, &Title{})
+
+	player.SendMessage("Print")             // 参数个数不对
+	player.SendMessage("Print", 1)          // 正常调用
+	player.SendMessage("Print", "2")        // 参数类型不对
+	player.SendMessage("Print", 3, 123)     // 参数个数不对
+	player.SendMessage("InvalidMethod", 10) // 不存在的方法
+}
+
+func TestEntity_SnapParts(t *testing.T) {
+	var player = &Player{}
+	player.AddPart(1, &Title{key: 1})
+	player.AddPart(2, &Title{key: 2})
+	player.AddPart(3, &Title{key: 3})
+
+	var parts []IPart
+	parts = player.SnapParts(parts)
+	parts = player.SnapParts(parts)
+	parts = player.SnapParts(parts)
+	if len(parts) != 3 {
+		t.Errorf("len(parts) should be 3")
 	}
 }
