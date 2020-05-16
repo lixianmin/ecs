@@ -94,16 +94,16 @@ func TestEntity_SendMessage(t *testing.T) {
 	player.SendMessage("InvalidMethod", 10) // 不存在的方法
 }
 
-func TestEntity_SnapParts(t *testing.T) {
+func TestEntity_GetParts(t *testing.T) {
 	var player = &Player{}
 	player.AddPart(1, &Title{key: 1})
 	player.AddPart(2, &Title{key: 2})
 	player.AddPart(3, &Title{key: 3})
 
 	var parts []IPart
-	parts = player.SnapParts(parts)
-	parts = player.SnapParts(parts)
-	parts = player.SnapParts(parts)
+	parts = player.GetParts(nil)
+	parts = player.GetParts(parts)
+	parts = player.GetParts(parts)
 	if len(parts) != 3 {
 		t.Errorf("len(parts) should be 3")
 	}
