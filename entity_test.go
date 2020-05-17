@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -44,23 +45,16 @@ func TestEntity_AddPart(t *testing.T) {
 	player.AddPart(title, &Title{})
 
 	var part = player.GetPart(title)
-	if part == nil {
-		t.Errorf("part should be got")
-	}
-	fmt.Println(part)
+	assert.NotNil(t, part)
 
 	player.RemovePart(title)
 	var part1 = player.GetPart(title)
-	if part1 != nil {
-		t.Errorf("part1 should be removed")
-	}
+	assert.Nil(t, part1)
 
 	player.AddPart(title, &Title{})
 	player.ClearParts()
 	var part2 = player.GetPart(title)
-	if part2 != nil {
-		t.Errorf("player should has no parts now")
-	}
+	assert.Nil(t, part2)
 }
 
 func TestEntity_AddParts(t *testing.T) {
@@ -78,9 +72,7 @@ func TestEntity_AddParts(t *testing.T) {
 	}
 
 	var removed = player.RemovePart(title2)
-	if removed.(*Title).key != title2 {
-		t.Errorf("remove error")
-	}
+	assert.Equal(t, removed.(*Title).key, title2)
 }
 
 func TestEntity_SendMessage(t *testing.T) {
@@ -104,7 +96,5 @@ func TestEntity_GetParts(t *testing.T) {
 	parts = player.GetParts(nil)
 	parts = player.GetParts(parts)
 	parts = player.GetParts(parts)
-	if len(parts) != 3 {
-		t.Errorf("len(parts) should be 3")
-	}
+	assert.Equal(t, len(parts), 3)
 }
