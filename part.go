@@ -20,7 +20,7 @@ func (part *Part) OnAdded() {
 
 }
 
-func (part *Part) OnRemoving() {
+func (part *Part) OnRemoved() {
 
 }
 

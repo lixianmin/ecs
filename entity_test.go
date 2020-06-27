@@ -29,9 +29,9 @@ func (title *Title) OnAdded() {
 	fmt.Printf("I am title, this is player=%v\n", player)
 }
 
-func (title *Title) OnRemoving() {
+func (title *Title) OnRemoved() {
 	var player = (*Player)(title.GetEntity())
-	fmt.Printf("before removed, player=%v\n", player)
+	fmt.Printf("after removed, player=%v\n", player)
 }
 
 func (title *Title) Print(d int) {

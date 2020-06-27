@@ -11,7 +11,7 @@ Copyright (C) - All Rights Reserved
 
 type IPart interface {
 	OnAdded()
-	OnRemoving()
+	OnRemoved()
 }
 
 type ISetEntity interface {

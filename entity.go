@@ -48,7 +48,6 @@ func (entity *Entity) RemovePart(key int) IPart {
 		var index = BinarySearch(keys, key)
 		if index >= 0 {
 			var part = parts[index]
-			part.OnRemoving()
 
 			var count = len(keys)
 			for i := index; i < count-1; i++ {
@@ -59,6 +58,8 @@ func (entity *Entity) RemovePart(key int) IPart {
 			entity.keys = keys[:count-1]
 			entity.parts = parts[:count-1]
 			sortKeysParts(entity.keys, entity.parts)
+
+			part.OnRemoved()
 			return part
 		}
 	}
@@ -135,12 +136,12 @@ func fetchArgs(method reflect.Value, args ...interface{}) []reflect.Value {
 func (entity *Entity) ClearParts() {
 	var parts = entity.parts
 	if parts != nil {
-		for _, part := range parts {
-			part.OnRemoving()
-		}
-
 		entity.keys = nil
 		entity.parts = nil
+
+		for _, part := range parts {
+			part.OnRemoved()
+		}
 	}
 }
 
