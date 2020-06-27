@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"sync"
+	"unsafe"
 )
 
 /********************************************************************
@@ -19,7 +20,7 @@ type SyncEntity struct {
 func (entity *SyncEntity) AddPart(key int, part IPart) IPart {
 	if nil != part {
 		entity.m.Lock()
-		entity.e.addPartInner(key, part)
+		entity.e.addPartInner(key, part, unsafe.Pointer(entity))
 		entity.m.Unlock()
 		part.OnAdded()
 		return part

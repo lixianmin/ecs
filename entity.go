@@ -21,7 +21,7 @@ type Entity struct {
 
 func (entity *Entity) AddPart(key int, part IPart) IPart {
 	if nil != part {
-		entity.addPartInner(key, part)
+		entity.addPartInner(key, part, unsafe.Pointer(entity))
 		part.OnAdded()
 		return part
 	}
@@ -29,12 +29,13 @@ func (entity *Entity) AddPart(key int, part IPart) IPart {
 	return nil
 }
 
-func (entity *Entity) addPartInner(key int, part IPart) {
+func (entity *Entity) addPartInner(key int, part IPart, pEntity unsafe.Pointer) {
 	entity.keys = append(entity.keys, key)
 	entity.parts = append(entity.parts, part)
 
+	// 这里不能使用this指针这个entity，因为在SyncEntity调用时会被切断
 	if setEntity, ok := part.(ISetEntity); ok {
-		setEntity.SetEntity(unsafe.Pointer(entity))
+		setEntity.SetEntity(pEntity)
 	}
 
 	sortKeysParts(entity.keys, entity.parts)
