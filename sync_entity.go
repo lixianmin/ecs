@@ -17,6 +17,25 @@ type SyncEntity struct {
 	e Entity
 }
 
+func (entity *SyncEntity) SetDefaultPart(key int, part IPart) IPart {
+	var lastPart = entity.GetPart(key)
+	if lastPart == nil && part != nil {
+		entity.m.Lock()
+		lastPart = entity.e.GetPart(key)
+		if lastPart == nil {
+			entity.e.addPartInner(key, part, unsafe.Pointer(entity))
+		}
+		entity.m.Unlock()
+
+		if lastPart == nil {
+			lastPart = part
+			part.OnAdded()
+		}
+	}
+
+	return lastPart
+}
+
 func (entity *SyncEntity) AddPart(key int, part IPart) IPart {
 	if nil != part {
 		entity.m.Lock()

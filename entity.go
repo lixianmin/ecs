@@ -19,6 +19,15 @@ type Entity struct {
 	parts []IPart
 }
 
+func (entity *Entity) SetDefaultPart(key int, part IPart) IPart {
+	var lastPart = entity.GetPart(key)
+	if lastPart == nil && part != nil {
+		lastPart = entity.AddPart(key, part)
+	}
+
+	return lastPart
+}
+
 func (entity *Entity) AddPart(key int, part IPart) IPart {
 	if nil != part {
 		entity.addPartInner(key, part, unsafe.Pointer(entity))
