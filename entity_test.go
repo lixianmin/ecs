@@ -75,16 +75,16 @@ func TestEntity_AddParts(t *testing.T) {
 	assert.Equal(t, removed.(*Title).key, title2)
 }
 
-func TestEntity_SendMessage(t *testing.T) {
-	var player = &Player{}
-	player.AddPart(1, &Title{})
-
-	player.SendMessage("Print")             // 参数个数不对
-	player.SendMessage("Print", 1)          // 正常调用
-	player.SendMessage("Print", "2")        // 参数类型不对
-	player.SendMessage("Print", 3, 123)     // 参数个数不对
-	player.SendMessage("InvalidMethod", 10) // 不存在的方法
-}
+//func TestEntity_SendMessage(t *testing.T) {
+//	var player = &Player{}
+//	player.AddPart(1, &Title{})
+//
+//	player.SendMessage("Print")             // 参数个数不对
+//	player.SendMessage("Print", 1)          // 正常调用
+//	player.SendMessage("Print", "2")        // 参数类型不对
+//	player.SendMessage("Print", 3, 123)     // 参数个数不对
+//	player.SendMessage("InvalidMethod", 10) // 不存在的方法
+//}
 
 func TestEntity_GetParts(t *testing.T) {
 	var player = &Player{}

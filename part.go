@@ -1,6 +1,9 @@
 package ecs
 
-import "unsafe"
+import (
+	"sync/atomic"
+	"unsafe"
+)
 
 /********************************************************************
 created:    2020-01-22
@@ -22,9 +25,9 @@ func (part *Part) OnRemoving() {
 }
 
 func (part *Part) SetEntity(entity unsafe.Pointer) {
-	part.entity = entity
+	atomic.StorePointer(&part.entity, entity)
 }
 
 func (part *Part) GetEntity() unsafe.Pointer {
-	return part.entity
+	return atomic.LoadPointer(&part.entity)
 }

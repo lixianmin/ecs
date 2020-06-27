@@ -21,19 +21,23 @@ type Entity struct {
 
 func (entity *Entity) AddPart(key int, part IPart) IPart {
 	if nil != part {
-		entity.keys = append(entity.keys, key)
-		entity.parts = append(entity.parts, part)
-
-		if setEntity, ok := part.(ISetEntity); ok {
-			setEntity.SetEntity(unsafe.Pointer(entity))
-		}
-
-		entity.sort()
+		entity.addPartInner(key, part)
 		part.OnAdded()
 		return part
 	}
 
 	return nil
+}
+
+func (entity *Entity) addPartInner(key int, part IPart) {
+	entity.keys = append(entity.keys, key)
+	entity.parts = append(entity.parts, part)
+
+	if setEntity, ok := part.(ISetEntity); ok {
+		setEntity.SetEntity(unsafe.Pointer(entity))
+	}
+
+	sortKeysParts(entity.keys, entity.parts)
 }
 
 func (entity *Entity) RemovePart(key int) IPart {
@@ -54,7 +58,7 @@ func (entity *Entity) RemovePart(key int) IPart {
 
 			entity.keys = keys[:count-1]
 			entity.parts = parts[:count-1]
-			entity.sort()
+			sortKeysParts(entity.keys, entity.parts)
 			return part
 		}
 	}
@@ -75,9 +79,14 @@ func (entity *Entity) GetPart(key int) IPart {
 	return nil
 }
 
-// 因为golang的反射很慢，通过SendMessage()调用方法并不是推荐的方式，只是说可以偶尔用之。
-func (entity *Entity) SendMessage(methodName string, args ...interface{}) {
-	var parts = entity.parts
+// 因为golang的反射很慢，通过SendMessage()调用方法并不是推荐的方式。
+// 另外，为了防止SendMessage()的过程中parts有变化，还需要取一个快照出来，有些慢
+//func (entity *Entity) SendMessage(methodName string, args ...interface{}) {
+//	var parts = entity.GetParts(nil)
+//	sendMessage(parts, methodName, args...)
+//}
+
+func sendMessage(parts []IPart, methodName string, args ...interface{}) {
 	var count = len(parts)
 	for i := 0; i < count; i++ {
 		var part = parts[i]
@@ -162,10 +171,7 @@ func (entity *Entity) GetParts(cache []IPart) []IPart {
 	return cache
 }
 
-func (entity *Entity) sort() {
-	var keys = entity.keys
-	var parts = entity.parts
-
+func sortKeysParts(keys []int, parts []IPart) {
 	var count = len(keys)
 	if keys == nil || count != len(parts) {
 		return

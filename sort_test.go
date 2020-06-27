@@ -46,3 +46,12 @@ func TestSort_SortBy(t *testing.T) {
 		}
 	}
 }
+
+func TestSort_SortNil (t *testing.T) {
+	var data []int = nil
+
+	var index7 = BinarySearch(data, 7)
+	if index7 != -1 {
+		t.Errorf("search 7 failed")
+	}
+}
