@@ -30,7 +30,7 @@ func (entity *Entity) SetDefaultPart(key int, part IPart) IPart {
 
 func (entity *Entity) AddPart(key int, part IPart) IPart {
 	if nil != part {
-		entity.addPartInner(key, part, unsafe.Pointer(entity))
+		entity.addPartImpl(key, part, unsafe.Pointer(entity))
 		part.OnAdded()
 		return part
 	}
@@ -38,7 +38,7 @@ func (entity *Entity) AddPart(key int, part IPart) IPart {
 	return nil
 }
 
-func (entity *Entity) addPartInner(key int, part IPart, pEntity unsafe.Pointer) {
+func (entity *Entity) addPartImpl(key int, part IPart, pEntity unsafe.Pointer) {
 	entity.keys = append(entity.keys, key)
 	entity.parts = append(entity.parts, part)
 
@@ -51,6 +51,15 @@ func (entity *Entity) addPartInner(key int, part IPart, pEntity unsafe.Pointer) 
 }
 
 func (entity *Entity) RemovePart(key int) IPart {
+	var part = entity.removePartImpl(key)
+	if part != nil {
+		part.OnRemoved()
+	}
+
+	return part
+}
+
+func (entity *Entity) removePartImpl(key int) IPart {
 	var keys = entity.keys
 	var parts = entity.parts
 
@@ -69,7 +78,6 @@ func (entity *Entity) RemovePart(key int) IPart {
 			entity.parts = parts[:count-1]
 			sortKeysParts(entity.keys, entity.parts)
 
-			part.OnRemoved()
 			return part
 		}
 	}

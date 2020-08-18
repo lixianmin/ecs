@@ -22,12 +22,14 @@ func (entity *SyncEntity) SetDefaultPart(key int, part IPart) IPart {
 	if lastPart == nil && part != nil {
 		entity.m.Lock()
 		lastPart = entity.e.GetPart(key)
-		if lastPart == nil {
-			entity.e.addPartInner(key, part, unsafe.Pointer(entity))
+		var isNew = lastPart == nil
+		if isNew {
+			entity.e.addPartImpl(key, part, unsafe.Pointer(entity))
 		}
 		entity.m.Unlock()
 
-		if lastPart == nil {
+		// 事件方法必须放到lock外面，否则有可能死锁
+		if isNew {
 			lastPart = part
 			part.OnAdded()
 		}
@@ -39,8 +41,10 @@ func (entity *SyncEntity) SetDefaultPart(key int, part IPart) IPart {
 func (entity *SyncEntity) AddPart(key int, part IPart) IPart {
 	if nil != part {
 		entity.m.Lock()
-		entity.e.addPartInner(key, part, unsafe.Pointer(entity))
+		entity.e.addPartImpl(key, part, unsafe.Pointer(entity))
 		entity.m.Unlock()
+
+		// 事件方法必须放到lock外面，否则有可能死锁
 		part.OnAdded()
 		return part
 	}
@@ -50,21 +54,37 @@ func (entity *SyncEntity) AddPart(key int, part IPart) IPart {
 
 func (entity *SyncEntity) RemovePart(key int) IPart {
 	entity.m.Lock()
-	defer entity.m.Unlock()
-	return entity.e.RemovePart(key)
+	var part = entity.e.removePartImpl(key)
+	entity.m.Unlock()
+
+	// 事件方法必须放到lock外面，否则有可能死锁
+	if part != nil {
+		part.OnRemoved()
+	}
+
+	return part
 }
 
 func (entity *SyncEntity) GetPart(key int) IPart {
 	entity.m.RLock()
 	var part = entity.e.GetPart(key)
 	entity.m.RUnlock()
+
 	return part
 }
 
 func (entity *SyncEntity) ClearParts() {
 	entity.m.Lock()
-	defer entity.m.Unlock()
-	entity.e.ClearParts()
+	var parts = entity.e.parts
+	if parts != nil {
+		entity.e.keys = nil
+		entity.e.parts = nil
+	}
+	entity.m.Unlock()
+
+	for _, part := range parts {
+		part.OnRemoved()
+	}
 }
 
 // cache参数是外面提供一个数组，entity下所有的parts都被会填充到这个cache中并返回
