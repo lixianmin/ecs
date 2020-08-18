@@ -44,14 +44,16 @@ func TestSyncEntity_AddPart(t *testing.T) {
 	var player = &SyncPlayer{}
 	player.AddPart(title, &SyncTitle{})
 
-	var part = player.GetPart(title)
+	var part, _ = player.GetPart(title).(*SyncTitle)
 	assert.NotNil(t, part)
+	var entity = (*SyncPlayer)(part.GetEntity())
+	fmt.Println(entity)
 
 	player.RemovePart(title)
 	var part1 = player.GetPart(title)
 	assert.Nil(t, part1)
 
-	player.AddPart(title, &Title{})
+	player.AddPart(title, &SyncTitle{})
 	player.ClearParts()
 	var part2 = player.GetPart(title)
 	assert.Nil(t, part2)

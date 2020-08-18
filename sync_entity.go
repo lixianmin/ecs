@@ -13,8 +13,8 @@ Copyright (C) - All Rights Reserved
 *********************************************************************/
 
 type SyncEntity struct {
-	m sync.RWMutex
 	e Entity
+	m sync.RWMutex
 }
 
 func (entity *SyncEntity) SetDefaultPart(key int, part IPart) IPart {
